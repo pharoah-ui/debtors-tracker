@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debtor Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .setup-section {
+            border-top: 1px solid #e1e5e9;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .setup-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .setup-btn {
+            background: #28a745;
+        }
+        
+        .recent-entries {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+        
+        .recent-entries h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .entry-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .entry-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .entry-amount {
+            color: #dc3545;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Debtor Tracker</h1>
+            <p>Quick entry to Google Sheets</p>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <form id="debtorForm">
+            <div class="form-group">
+                <label for="debtorName">Debtor Name</label>
+                <input type="text" id="debtorName" placeholder="Enter debtor's name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" placeholder="Enter amount" step="0.01" required>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                Add Entry
+            </button>
+        </form>
+        
+        <div class="setup-section">
+            <h3>📋 Setup Google Sheets</h3>
+            <div class="form-group">
+                <label for="sheetId">Google Sheet ID</label>
+                <input type="text" id="sheetId" placeholder="Enter your Google Sheet ID">
+            </div>
+            <button type="button" class="btn setup-btn" id="setupBtn">
+                Save Configuration
+            </button>
+        </div>
+        
+        <div class="recent-entries">
+            <h3>📊 Recent Entries</h3>
+            <div id="recentList">
+                <p style="color: #666; font-size: 14px; text-align: center;">No recent entries</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DebtorTracker {
+            constructor() {
+                this.sheetId = localStorage.getItem('sheetId') || '';
+                this.recentEntries = JSON.parse(localStorage.getItem('recentEntries') || '[]');
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.loadConfiguration();
+                this.displayRecentEntries();
+            }
+            
+            bindEvents() {
+                document.getElementById('debtorForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addEntry();
+                });
+                
+                document.getElementById('setupBtn').addEventListener('click', () => {
+                    this.saveConfiguration();
+                });
+            }
+            
+            loadConfiguration() {
+                const sheetIdInput = document.getElementById('sheetId');
+                if (this.sheetId) {
+                    sheetIdInput.value = this.sheetId;
+                }
+            }
+            
+            saveConfiguration() {
+                const sheetIdInput = document.getElementById('sheetId');
+                const sheetId = sheetIdInput.value.trim();
+                
+                if (!sheetId) {
+                    this.showStatus('Please enter a valid Google Sheet ID', 'error');
+                    return;
+                }
+                
+                this.sheetId = sheetId;
+                localStorage.setItem('sheetId', sheetId);
+                this.showStatus('Configuration saved successfully!', 'success');
+            }
+            
+            async addEntry() {
+                const nameInput = document.getElementById('debtorName');
+                const amountInput = document.getElementById('amount');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                const name = nameInput.value.trim();
+                const amount = parseFloat(amountInput.value);
+                
+                if (!name || isNaN(amount)) {
+                    this.showStatus('Please enter valid name and amount', 'error');
+                    return;
+                }
+                
+                if (!this.sheetId) {
+                    this.showStatus('Please configure your Google Sheet ID first', 'error');
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Adding...';
+                
+                try {
+                    // Simulate API call to Google Sheets
+                    await this.simulateSheetUpdate(name, amount);
+                    
+                    // Add to recent entries
+                    this.addToRecent(name, amount);
+                    
+                    // Clear form
+                    nameInput.value = '';
+                    amountInput.value = '';
+                    
+                    this.showStatus(`Successfully added ${name}: $${amount.toFixed(2)}`, 'success');
+                    
+                } catch (error) {
+                    this.showStatus('Error adding entry. Please try again.', 'error');
+                    console.error('Error:', error);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Add Entry';
+                }
+            }
+            
+            async simulateSheetUpdate(name, amount) {
+                // In a real implementation, this would use Google Sheets API
+                // For demo purposes, we'll simulate the API call
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log(`Would update Google Sheet ${this.sheetId} with:`, { name, amount });
+                        resolve();
+                    }, 1000);
+                });
+            }
+            
+            addToRecent(name, amount) {
+                const entry = {
+                    name,
+                    amount,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Check if debtor already exists in recent entries
+                const existingIndex = this.recentEntries.findIndex(e => e.name.toLowerCase() === name.toLowerCase());
+                
+                if (existingIndex !== -1) {
+                    // Update existing entry
+                    this.recentEntries[existingIndex].amount += amount;
+                    this.recentEntries[existingIndex].timestamp = entry.timestamp;
+                } else {
+                    // Add new entry
+                    this.recentEntries.unshift(entry);
+                }
+                
+                // Keep only last 10 entries
+                this.recentEntries = this.recentEntries.slice(0, 10);
+                
+                localStorage.setItem('recentEntries', JSON.stringify(this.recentEntries));
+                this.displayRecentEntries();
+            }
+            
+            displayRecentEntries() {
+                const recentList = document.getElementById('recentList');
+                
+                if (this.recentEntries.length === 0) {
+                    recentList.innerHTML = '<p style="color: #666; font-size: 14px; text-align: center;">No recent entries</p>';
+                    return;
+                }
+                
+                const entriesHTML = this.recentEntries.map(entry => `
+                    <div class="entry-item">
+                        <span class="entry-name">${entry.name}</span>
+                        <span class="entry-amount">$${entry.amount.toFixed(2)}</span>
+                    </div>
+                `).join('');
+                
+                recentList.innerHTML = entriesHTML;
+            }
+            
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = 'block';
+                
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Initialize the app
+        new DebtorTracker();
+    </script>
+</body>
+</html>
